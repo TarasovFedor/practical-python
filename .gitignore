@@ -126,4 +126,11 @@ venv.bak/
 dmypy.json
 
 # Pyre type checker
+<<<<<<< HEAD
 .pyre/
+=======
+.pyre/
+
+# My folders
+Work/other/
+>>>>>>> 7607121d9b3a5a121677c0f8116ac821dc89aee3
