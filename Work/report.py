@@ -8,30 +8,40 @@ import sys
 import os
 other_dir = os.path.join(os.path.dirname(__file__), 'Other')
 sys.path.append(other_dir)
-import read_prices
+from read_prices import color_text, read_prices, str_clean
 
 
-def read_portfolio(filename: str) -> list[dict[str, Any]]:
-    '''Parces provided portfolio.csv making a list of dictionaries containing the name of the stock, amount of shares of that stock and its price'''
+def read_portfolio(filename: str) -> list[dict[str, Any]] | None:
+    '''Parces provided portfolio.csv making a list of dictionaries with info from the portfolio. Portfolio should have "shares" and "price" columns'''
     portfolio = []
     rows = []
 
     with open(filename, 'rt') as file:
         # headers = list(map(lambda a: a.strip(), next(file).split(',')))
-        headers = [s.strip() for s in next(file).split(',')]
+        headers = [str_clean(s) for s in next(file).split(',')]
+        if (not('shares' in headers)) or (not('price' in headers)):
+            print(color_text(f'Couldn\'t find column "shares" and\\or column "price" in provided portfolio'))
+            return None
 
         for row in file:
-            row = tuple(row.split(','))
-            row = (read_prices.str_clean(row[0]), int(row[1]), float(row[2]))
-            rows.append(row)
+            row = (str_clean(s) for s in row.split(','))
+            
+            row = dict(zip(headers, row))
+            try:
+                row['shares'] = int(row['shares']) # type: ignore
+                row['price'] = float(row['price']) # type: ignore
+            except ValueError:
+                print(color_text(f'Couldn\'t convert shares or price into numeric types in this row: \n{row}'))
 
-        for i in range(len(rows)):
-            line = {}
+            portfolio.append(row)
+
+        # for i in range(len(rows)):
+        #     line = {}
             
-            for j in range(len(headers)):
-                line[headers[j]] = rows[i][j]
+        #     for j in range(len(headers)):
+        #         line[headers[j]] = rows[i][j]
             
-            portfolio.append(line)
+        #     portfolio.append(line)
 
     return portfolio
 
@@ -50,8 +60,9 @@ def make_report(portfolio: list[dict[str, Any]], prices: dict[str, Any]) -> list
     return report
 
 
-portfolio = read_portfolio('Work/Data/portfolio.csv')
-prices = read_prices.read_prices('Work/Data/prices.csv')
+# portfolio = read_portfolio('Work/Data/portfolio.csv')
+portfolio = read_portfolio('Work/Data/portfoliodate.csv')
+prices = read_prices('Work/Data/prices.csv')
 
 headers = ('Name', 'Shares', 'Price', 'Change')
 # for h in headers:
@@ -60,7 +71,7 @@ headers = ('Name', 'Shares', 'Price', 'Change')
 print(''.join(f'{h:>10s} ' for h in headers))
 print('-'*10 + ' ' + '-'*10 + ' ' + '-'*10 + ' ' + '-'*10)
 
-report = make_report(portfolio, prices)
+report = make_report(portfolio, prices) # type: ignore
 for name, shares, price, change in report: #type: ignore
     print(f'{name:>10s} {shares:>10d} {('$'+str(price)):>10s} {change:>10.2f}')
 
