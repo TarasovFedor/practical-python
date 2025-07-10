@@ -1,6 +1,6 @@
 # from pprint import pprint
 
-def color_text(text: str, color_code: int = 244) -> str:
+def color_text(*text: str, color_code: int = 244) -> str:
     '''Colors provided text with the specified color (grey by default)'''
     return f"\033[38;5;{color_code}m{text}\033[0m"
 
@@ -13,14 +13,14 @@ def read_prices(filename: str) -> dict[str, float]:
     prices = {}
 
     with open(filename, 'rt') as file:
-        for line in file:
-            line = line.split(',')
+        for i, line in enumerate(file, start=1):
+            line = [str_clean(s) for s in line.split(',')]
             try:
-                prices[str_clean(line[0])] = float(str_clean(line[1]))
+                prices[line[0]] = float(line[1])
             except IndexError:
-                print(color_text(f'IndexError raised by value that belongs to {line[0]!r}'))
+                print(color_text(f'IndexError raised by value that belongs to {line[0]!r} in line {i}'))
             except ValueError:
-                print(color_text(f'Could not convert value {line[1]!r} to float; the value belongs to {line[0]!r}', 244))
+                print(color_text(f'Could not convert value {line[1]!r} to float; the value belongs to {line[0]!r} in line {i}'))
 
     return prices
 

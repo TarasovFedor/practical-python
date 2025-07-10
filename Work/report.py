@@ -15,24 +15,27 @@ def read_portfolio(filename: str) -> list[dict[str, Any]]:
     '''Parces provided portfolio.csv making a list of dictionaries with info from the portfolio. Portfolio should have "shares" and "price" columns'''
     portfolio = []
 
-    with open(filename, 'rt') as file:
-        # headers = list(map(lambda a: a.strip(), next(file).split(',')))
-        headers = [str_clean(s) for s in next(file).split(',')]
-        if (not('shares' in headers)) or (not('price' in headers)):
-            print(color_text(f'Couldn\'t find column "shares" and/or column "price" in provided portfolio'))
-            portfolio = [{'shares': None, 'price': None}]
-        else:
+    try:
+        with open(filename, 'rt') as file:
+            # headers = list(map(lambda a: a.strip(), next(file).split(',')))
+            headers = [str_clean(s) for s in next(file).split(',')]
+
             for row in file:
                 row = (str_clean(s) for s in row.split(','))
                 
                 row = dict(zip(headers, row))
-                try:
-                    row['shares'] = int(row['shares']) # type: ignore
-                    row['price'] = float(row['price']) # type: ignore
-                except ValueError:
-                    print(color_text(f'Couldn\'t convert "shares" or "price" into numeric types in this row: \n{row}'))
 
+                row['shares'] = int(row['shares']) # type: ignore
+                row['price'] = float(row['price']) # type: ignore
+                
                 portfolio.append(row)
+
+    except FileNotFoundError:
+        print(color_text(f'No such file or directory: {filename}'))
+    except ValueError:
+        print(color_text(f'Couldn\'t convert "shares" or "price" into numeric types in this row: \n{row}'))
+    except KeyError:
+        print(color_text(f'Couldn\'t find column "shares" and/or column "price" in provided portfolio'))
 
     return portfolio
         # for i in range(len(rows)):
@@ -59,7 +62,7 @@ def make_report(portfolio: list[dict[str, Any]], prices: dict[str, Any]) -> list
     return report
 
 
-if __name__ == 'Main':
+if __name__ == '__main__':
     # portfolio = read_portfolio('Work/Data/portfolio.csv')
     portfolio = read_portfolio('Work/Data/portfoliodate.csv')
     prices = read_prices('Work/Data/prices.csv')
@@ -73,7 +76,7 @@ if __name__ == 'Main':
 
     report = make_report(portfolio, prices) # type: ignore
     for name, shares, price, change in report: #type: ignore
-        print(f'{name:>10s} {shares:>10d} {('$'+str(price)):>10s} {change:>10.2f}')
+        print(f'{name:>10s} {shares:>10d} {("$"+str(price)):>10s} {change:>10.2f}')
 
 
 # print(read_portfolio('Work/Data/portfolio.csv'))
