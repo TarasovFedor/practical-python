@@ -47,7 +47,7 @@ def read_portfolio(filename: str) -> list[dict[str, Any]]:
         #     portfolio.append(line)
 
 
-def make_report(portfolio: list[dict[str, Any]], prices: dict[str, Any]) -> list[tuple[Any]]:
+def make_report(portfolio: list[dict[str, Any]], prices: dict[str, Any]) -> list[tuple[str, int, float, float]]:
     '''Makes a report about changes in prices of stocks from provided portfolio'''
     report = []
 
@@ -61,22 +61,38 @@ def make_report(portfolio: list[dict[str, Any]], prices: dict[str, Any]) -> list
 
     return report
 
+def print_report(report: list[tuple[str, int, float, float]]) -> None:
+    '''Prints provided report, which should contain "Name", "Shares", "Price" and "Change" values'''
+    headers = ('Name', 'Shares', 'Price', 'Change')
+    print(''.join(f'{h:>10s} ' for h in headers))
+    print('-'*10 + ' ' + '-'*10 + ' ' + '-'*10 + ' ' + '-'*10)
+    for name, shares, price, change in report:
+        print(f'{name:>10s} {shares:>10d} {("$"+str(price)):>10s} {change:>10.2f}')
+
+def portfolio_report(filenames: list[str], prices: str = 'Work/Data/prices.csv') -> tuple[list[tuple[str, int, float, float]]]:
+    '''Returns a tuple of reports about changes in prices of stocks from provided portfolios'''
+    reports = []
+    
+    for filename in filenames:
+        report = make_report(read_portfolio(filename), read_prices(prices))
+        reports.append(report)
+
+    return tuple(reports)
+
 
 if __name__ == '__main__':
     # portfolio = read_portfolio('Work/Data/portfolio.csv')
-    portfolio = read_portfolio('Work/Data/portfoliodate.csv')
-    prices = read_prices('Work/Data/prices.csv')
+    # portfolio = read_portfolio('Work/Data/portfoliodate.csv')
+    # prices = read_prices('Work/Data/prices.csv')
 
-    headers = ('Name', 'Shares', 'Price', 'Change')
-    # for h in headers:
-    #     print(f'{h:>10s} ', end='')
-    # print()
-    print(''.join(f'{h:>10s} ' for h in headers))
-    print('-'*10 + ' ' + '-'*10 + ' ' + '-'*10 + ' ' + '-'*10)
+    # report = make_report(portfolio, prices)
 
-    report = make_report(portfolio, prices) # type: ignore
-    for name, shares, price, change in report: #type: ignore
-        print(f'{name:>10s} {shares:>10d} {("$"+str(price)):>10s} {change:>10.2f}')
+    reports = portfolio_report(['Work/Data/portfolio.csv', 'Work/Data/portfoliodate.csv'])
+    print(reports)
+
+    for report in reports:
+        print_report(report)
+        print()
 
 
 # print(read_portfolio('Work/Data/portfolio.csv'))

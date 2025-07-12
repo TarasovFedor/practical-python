@@ -1,6 +1,6 @@
 # from pprint import pprint
 
-def color_text(*text: str, color_code: int = 244) -> str:
+def color_text(text: str, color_code: int = 244) -> str:
     '''Colors provided text with the specified color (grey by default)'''
     return f"\033[38;5;{color_code}m{text}\033[0m"
 
