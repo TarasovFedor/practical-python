@@ -2,112 +2,78 @@
 #
 # Exercise 2.4
 
-from pprint import pprint
+# from pprint import pprint
 from typing import Any
+from fileparse import parse_csv
 import sys
 import os
 other_dir = os.path.join(os.path.dirname(__file__), 'Other')
 sys.path.append(other_dir)
-from read_prices import color_text, read_prices, str_clean
+from read_prices import color_text
+from stock import Stock
 
 
-def read_portfolio(filename: str) -> list[dict[str, Any]]:
-    '''Parces provided portfolio.csv making a list of dictionaries with info from the portfolio. Portfolio should have "shares" and "price" columns'''
-    portfolio = []
+def read_portfolio(filename: str) -> list[Stock]:
+    '''Parces provided portfolio.csv making a list of dictionaries with info from the portfolio.
+    Portfolio should have "shares" and "price" columns'''
 
     try:
         with open(filename, 'rt') as file:
-            # headers = list(map(lambda a: a.strip(), next(file).split(',')))
-            headers = [str_clean(s) for s in next(file).split(',')]
-
-            for row in file:
-                row = (str_clean(s) for s in row.split(','))
-                
-                row = dict(zip(headers, row))
-
-                row['shares'] = int(row['shares']) # type: ignore
-                row['price'] = float(row['price']) # type: ignore
-                
-                portfolio.append(row)
-
+            stocks = parse_csv(file, select=['name', 'shares', 'price'], types=[str, int, float])
+            stocks = [Stock(entry['name'], entry['shares'], entry['price']) for entry in stocks] # type: ignore
+            return stocks
+        
     except FileNotFoundError:
         print(color_text(f'No such file or directory: {filename}'))
-    except ValueError:
-        print(color_text(f'Couldn\'t convert "shares" or "price" into numeric types in this row: \n{row}'))
-    except KeyError:
-        print(color_text(f'Couldn\'t find column "shares" and/or column "price" in provided portfolio'))
+        return []
 
-    return portfolio
-        # for i in range(len(rows)):
-        #     line = {}
-            
-        #     for j in range(len(headers)):
-        #         line[headers[j]] = rows[i][j]
-            
-        #     portfolio.append(line)
+def read_prices(filename: str) -> dict[str, float]:
+    prices = {}
+
+    try:
+        with open(filename) as file:
+            prices = dict(parse_csv(file, types=[str, float], has_headers=False)) # type: ignore
+    except FileNotFoundError:
+        print(color_text(f'No such file or directory: {filename}'))
+    
+    return prices # type: ignore
 
 
-def make_report(portfolio: list[dict[str, Any]], prices: dict[str, Any]) -> list[tuple[str, int, float, float]]:
+def make_report_data(portfolio: list[Stock], prices: dict[str, Any]) -> list[tuple[str, int, float, float]]:
     '''Makes a report about changes in prices of stocks from provided portfolio'''
     report = []
 
     for i in range(len(portfolio)):
-        stock_name = portfolio[i]['name']
-        stock_shares = portfolio[i]['shares']
+        stock_name = portfolio[i].name
+        stock_shares = portfolio[i].shares
         new_price = prices[stock_name]
-        change = new_price - portfolio[i]['price']
+        change = portfolio[i].price - new_price
 
         report.append((stock_name, stock_shares, new_price, change))
 
     return report
 
-def print_report(report: list[tuple[str, int, float, float]]) -> None:
+def print_report(reportdata: list[tuple[str, int, float, float]]) -> None:
     '''Prints provided report, which should contain "Name", "Shares", "Price" and "Change" values'''
     headers = ('Name', 'Shares', 'Price', 'Change')
     print(''.join(f'{h:>10s} ' for h in headers))
-    print('-'*10 + ' ' + '-'*10 + ' ' + '-'*10 + ' ' + '-'*10)
-    for name, shares, price, change in report:
+    print(('-'*10 + ' ') * len(headers))
+
+    for name, shares, price, change in reportdata:
         print(f'{name:>10s} {shares:>10d} {("$"+str(price)):>10s} {change:>10.2f}')
 
-def portfolio_report(filenames: list[str], prices: str = 'Work/Data/prices.csv') -> tuple[list[tuple[str, int, float, float]]]:
-    '''Returns a tuple of reports about changes in prices of stocks from provided portfolios'''
-    reports = []
-    
-    for filename in filenames:
-        report = make_report(read_portfolio(filename), read_prices(prices))
-        reports.append(report)
+def portfolio_report(datafile: str, pricefile: str = 'Work/Data/prices.csv', will_print: bool = False) -> list[tuple[str, int, float, float]]:
+    '''Returns a report about changes in prices of stocks from provided portfolio.
+    \nCan also print the report if "will_print" is True'''
 
-    return tuple(reports)
+    prices = read_prices(pricefile)
 
+    portfolio = read_portfolio(datafile)
+    report = make_report_data(portfolio, prices)
 
-if __name__ == '__main__':
-    # portfolio = read_portfolio('Work/Data/portfolio.csv')
-    # portfolio = read_portfolio('Work/Data/portfoliodate.csv')
-    # prices = read_prices('Work/Data/prices.csv')
-
-    # report = make_report(portfolio, prices)
-
-    reports = portfolio_report(['Work/Data/portfolio.csv', 'Work/Data/portfoliodate.csv'])
-    print(reports)
-
-    for report in reports:
+    if will_print:
         print_report(report)
-        print()
 
+    return report
 
-# print(read_portfolio('Work/Data/portfolio.csv'))
-# pprint(read_portfolio('Work/Data/portfolio.csv'))
-
-# pprint(make_report(portfolio, prices))
-
-# difference = 0
-# for i in range(len(portfolio)):
-#     stock_name = portfolio[i]['name']
-#     stock_shares = portfolio[i]['shares']
-
-#     spent = portfolio[i]['price'] * stock_shares
-#     possible_income = prices[stock_name] * stock_shares # type: ignore
-
-#     difference += possible_income - spent
-
-# print(difference)
+portfolio_report('Work/Data/portfolio.csv', will_print=True)
