@@ -2,15 +2,14 @@
 #
 # Exercise 2.4
 
-# from pprint import pprint
 from typing import Any
 from fileparse import parse_csv
-import sys
-import os
-other_dir = os.path.join(os.path.dirname(__file__), 'Other')
-sys.path.append(other_dir)
-from read_prices import color_text
 from stock import Stock
+import tableformat
+
+def color_text(text: str, color_code: int = 244) -> str:
+    '''Colors provided text with the specified color (grey by default)'''
+    return f"\033[38;5;{color_code}m{text}\033[0m"
 
 
 def read_portfolio(filename: str) -> list[Stock]:
@@ -47,33 +46,37 @@ def make_report_data(portfolio: list[Stock], prices: dict[str, Any]) -> list[tup
         stock_name = portfolio[i].name
         stock_shares = portfolio[i].shares
         new_price = prices[stock_name]
-        change = portfolio[i].price - new_price
+        change = new_price - portfolio[i].price
 
         report.append((stock_name, stock_shares, new_price, change))
 
     return report
 
-def print_report(reportdata: list[tuple[str, int, float, float]]) -> None:
+def print_report(reportdata: list[tuple[str, int, float, float]], formatter: tableformat.TableFormatter, format: str = 'text table') -> None:
     '''Prints provided report, which should contain "Name", "Shares", "Price" and "Change" values'''
-    headers = ('Name', 'Shares', 'Price', 'Change')
-    print(''.join(f'{h:>10s} ' for h in headers))
-    print(('-'*10 + ' ') * len(headers))
+    formatter.headings(('Name', 'Shares', 'Price', 'Change'))
 
     for name, shares, price, change in reportdata:
-        print(f'{name:>10s} {shares:>10d} {("$"+str(price)):>10s} {change:>10.2f}')
+        rowdata = [name, str(shares), f'{price:0.2f}', f'{change:0.2f}']
+        formatter.row(rowdata)
 
-def portfolio_report(datafile: str, pricefile: str = 'Work/Data/prices.csv', will_print: bool = False) -> list[tuple[str, int, float, float]]:
+def portfolio_report(datafile: str, pricefile: str = 'Work/Data/prices.csv', will_print: bool = False, format: str = 'txt') -> list[tuple[str, int, float, float]]:
     '''Returns a report about changes in prices of stocks from provided portfolio.
     \nCan also print the report if "will_print" is True'''
 
+    portfolio = read_portfolio(datafile)
     prices = read_prices(pricefile)
 
-    portfolio = read_portfolio(datafile)
     report = make_report_data(portfolio, prices)
 
     if will_print:
-        print_report(report)
+        formatter = tableformat.create_formatter(format)
+        print_report(report, formatter)
 
     return report
 
-portfolio_report('Work/Data/portfolio.csv', will_print=True)
+
+# portfolio = read_portfolio('Work/Data/portfolio.csv')
+# frmt = tableformat.create_formatter('html')
+# tableformat.print_table(portfolio, frmt, ['name', 'price'])
+# portf = portfolio_report('Work/Data/portfolio.csv', will_print=True, format='csv')

@@ -3,7 +3,7 @@
 # Exercise 3.3
 import csv
 from typing import Iterable, Type, Any
-from stock import Stock
+# from stock import Stock
 
 from os import path as ospath
 from sys import path as syspath

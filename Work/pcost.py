@@ -3,7 +3,6 @@
 # Exercise 1.27
 
 from report import read_portfolio
-from stock import Stock
 
 
 def portfolio_cost(filename: str) -> float:
@@ -11,4 +10,4 @@ def portfolio_cost(filename: str) -> float:
 
     portfolio = read_portfolio(filename)
 
-    return sum((entry.cost() for entry in portfolio)) # type: ignore
+    return sum((entry.cost for entry in portfolio))

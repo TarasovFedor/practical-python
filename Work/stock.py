@@ -1,13 +1,23 @@
-# from fileparse import parse_csv
-
-
 class Stock:
-    '''Class that represent a single holding of stock'''
-    def __init__(self, name: str, shares: int, price: float):
+    '''Class that represents a single holding of stock consisting of name, shares and price.'''
+    __slots__ = ('name', '_shares', 'price')
+    
+    def __init__(self, name: str, shares: int, price: float) -> None:
         self.name = name
         self.shares = shares
         self.price = price
 
+    @property
+    def shares(self) -> int:
+        return self._shares
+    
+    @shares.setter
+    def shares(self, value: int) -> int:
+        if isinstance(value, int):
+            self._shares = value
+        raise TypeError('Expected integer')
+
+    @property
     def cost(self) -> float:
         '''Returns cost of the holding'''
         return self.shares * self.price
@@ -16,11 +26,28 @@ class Stock:
         '''"Sells" provided amount of the stock'''
         self.shares -= amount
 
-# if __name__ == '__main__':
-#     with open('Work/Data/portfolio.csv') as rows:
-#         portdicts = parse_csv(rows, select=['name', 'shares', 'price'], has_headers=True, types=[str, int, float])
-        
-#     portfolio = [Stock(d['name'], d['shares'], d['price']) for d in portdicts] #type: ignore
+    def __str__(self) -> str:
+        return f'Name: {self.name}, shares: {self.shares}, price: ${self.price}'
 
-#     for entry in portfolio:
-#         print(entry.name, entry.shares, entry.price)
+    def __repr__(self) -> str:
+        return f"Stock('{self.name}', {self.shares}, {self.price})"
+
+class MyStock(Stock):
+    def panic(self):
+        self.sell(self.shares)
+
+if __name__ == '__main__':
+    # with open('Work/Data/portfolio.csv') as rows:
+    #     portdicts = parse_csv(rows, select=['name', 'shares', 'price'], has_headers=True, types=[str, int, float])
+        
+    # portfolio = [Stock(d['name'], d['shares'], d['price']) for d in portdicts] #type: ignore
+
+    # portfolio[0] = MyStock(portfolio[0].name, portfolio[0].shares, portfolio[0].price)
+    # portfolio[0].panic()
+    # print(portfolio[0].shares)
+    # st = Stock('QWQ', 120, 13.37)
+    # print(repr(st))
+    # st2 = eval(repr(st))
+    # print(st2)
+    st = Stock('QWQ', 120, 13.37)
+    print(st.cost)
