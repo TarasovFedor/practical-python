@@ -1,21 +1,18 @@
+from typedproperty import String, Integer, Float
+
+
 class Stock:
     '''Class that represents a single holding of stock consisting of name, shares and price.'''
-    __slots__ = ('name', '_shares', 'price')
+    __slots__ = ('_name', '_shares', '_price')
+
+    name = String('name')
+    shares = Integer('shares')
+    price = Float('price')
     
     def __init__(self, name: str, shares: int, price: float) -> None:
         self.name = name
         self.shares = shares
         self.price = price
-
-    @property
-    def shares(self) -> int:
-        return self._shares
-    
-    @shares.setter
-    def shares(self, value: int) -> int:
-        if isinstance(value, int):
-            self._shares = value
-        raise TypeError('Expected integer')
 
     @property
     def cost(self) -> float:
@@ -30,13 +27,14 @@ class Stock:
         return f'Name: {self.name}, shares: {self.shares}, price: ${self.price}'
 
     def __repr__(self) -> str:
-        return f"Stock('{self.name}', {self.shares}, {self.price})"
+        return f"Stock({self.name!r}, {self.shares!r}, {self.price!r})"
 
 class MyStock(Stock):
     def panic(self):
         self.sell(self.shares)
 
-if __name__ == '__main__':
+
+# if __name__ == '__main__':
     # with open('Work/Data/portfolio.csv') as rows:
     #     portdicts = parse_csv(rows, select=['name', 'shares', 'price'], has_headers=True, types=[str, int, float])
         
@@ -49,5 +47,5 @@ if __name__ == '__main__':
     # print(repr(st))
     # st2 = eval(repr(st))
     # print(st2)
-    st = Stock('QWQ', 120, 13.37)
-    print(st.cost)
+    # st = Stock('QWQ', 120, 13.37)
+    # print(st.cost)

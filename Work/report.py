@@ -5,6 +5,7 @@
 from typing import Any
 from fileparse import parse_csv
 from stock import Stock
+from portfolio import Portfolio
 import tableformat
 
 def color_text(text: str, color_code: int = 244) -> str:
@@ -12,19 +13,20 @@ def color_text(text: str, color_code: int = 244) -> str:
     return f"\033[38;5;{color_code}m{text}\033[0m"
 
 
-def read_portfolio(filename: str) -> list[Stock]:
+def read_portfolio(filename: str) -> Portfolio:
     '''Parces provided portfolio.csv making a list of dictionaries with info from the portfolio.
     Portfolio should have "shares" and "price" columns'''
 
     try:
         with open(filename, 'rt') as file:
             stocks = parse_csv(file, select=['name', 'shares', 'price'], types=[str, int, float])
-            stocks = [Stock(entry['name'], entry['shares'], entry['price']) for entry in stocks] # type: ignore
-            return stocks
+            stocks = [Stock(**entry) for entry in stocks] # type: ignore
         
     except FileNotFoundError:
         print(color_text(f'No such file or directory: {filename}'))
-        return []
+        stocks = []
+    
+    return Portfolio(stocks)
 
 def read_prices(filename: str) -> dict[str, float]:
     prices = {}
@@ -38,7 +40,7 @@ def read_prices(filename: str) -> dict[str, float]:
     return prices # type: ignore
 
 
-def make_report_data(portfolio: list[Stock], prices: dict[str, Any]) -> list[tuple[str, int, float, float]]:
+def make_report_data(portfolio: Portfolio, prices: dict[str, Any]) -> list[tuple[str, int, float, float]]:
     '''Makes a report about changes in prices of stocks from provided portfolio'''
     report = []
 
@@ -77,6 +79,7 @@ def portfolio_report(datafile: str, pricefile: str = 'Work/Data/prices.csv', wil
 
 
 # portfolio = read_portfolio('Work/Data/portfolio.csv')
+# print(portfolio.tabulate_shares())
 # frmt = tableformat.create_formatter('html')
 # tableformat.print_table(portfolio, frmt, ['name', 'price'])
 # portf = portfolio_report('Work/Data/portfolio.csv', will_print=True, format='csv')

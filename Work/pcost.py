@@ -10,4 +10,4 @@ def portfolio_cost(filename: str) -> float:
 
     portfolio = read_portfolio(filename)
 
-    return sum((entry.cost for entry in portfolio))
+    return portfolio.total_cost
