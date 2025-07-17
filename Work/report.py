@@ -19,14 +19,15 @@ def read_portfolio(filename: str) -> Portfolio:
 
     try:
         with open(filename, 'rt') as file:
-            stocks = parse_csv(file, select=['name', 'shares', 'price'], types=[str, int, float])
-            stocks = [Stock(**entry) for entry in stocks] # type: ignore
+            stocks = Portfolio.from_csv(file)
+            # stocks = parse_csv(file, select=['name', 'shares', 'price'], types=[str, int, float])
+            # stocks = [Stock(**entry) for entry in stocks] # type: ignore
         
     except FileNotFoundError:
         print(color_text(f'No such file or directory: {filename}'))
-        stocks = []
+        stocks = Portfolio()
     
-    return Portfolio(stocks)
+    return stocks
 
 def read_prices(filename: str) -> dict[str, float]:
     prices = {}
@@ -78,8 +79,8 @@ def portfolio_report(datafile: str, pricefile: str = 'Work/Data/prices.csv', wil
     return report
 
 
-# portfolio = read_portfolio('Work/Data/portfolio.csv')
-# print(portfolio.tabulate_shares())
+portfolio = read_portfolio('Work/Data/portfolio.csv')
+print(portfolio)
 # frmt = tableformat.create_formatter('html')
 # tableformat.print_table(portfolio, frmt, ['name', 'price'])
 # portf = portfolio_report('Work/Data/portfolio.csv', will_print=True, format='csv')
