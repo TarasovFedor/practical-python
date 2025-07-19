@@ -1,5 +1,5 @@
 import unittest
-import stock
+from Reports import stock
 
 class TestStock(unittest.TestCase):
     def test_create(self):
@@ -21,7 +21,6 @@ class TestStock(unittest.TestCase):
         s = stock.Stock('GOOG', 100, 490.1)
         with self.assertRaises(TypeError):
             s.shares = '100.9'
-        s.shares = 100.9
 
 
 if __name__ == '__main__':

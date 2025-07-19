@@ -62,7 +62,7 @@ class Portfolio:
         return self
     
 
-if __name__ == '__main__':
-    with open('Work/Data/portfolio.csv') as file:
-        port = Portfolio.from_csv(file)
-        print(port)
+# if __name__ == '__main__':
+#     with open('Work/Data/portfolio.csv') as file:
+#         port = Portfolio.from_csv(file)
+#         print(port)

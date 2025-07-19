@@ -1,4 +1,8 @@
-def typedproperty(name, expected_type):
+from typing import Type, Any
+
+
+def typedproperty(name: str, expected_type: Type[Any]):
+    '''Creates a private property and a setter for it with provided type.'''
     private_name = '_' + name
 
     @property
@@ -6,7 +10,7 @@ def typedproperty(name, expected_type):
         return getattr(self, private_name)
     
     @prop.setter
-    def prop(self, value):
+    def prop(self, value: Any):
         if not isinstance(value, expected_type):
             raise TypeError(f'Expected {expected_type}, but {type(value)} given')
         setattr(self, private_name, value)
